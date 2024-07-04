@@ -275,7 +275,7 @@
                     {
                       "Ref": "AWS::Region"
                     },
-                    ":366590864501:repository/bedrock-proxy-api-ecs"
+                    ":269550163595:repository/bedrock-proxy-api-ecs"
                   ]
                 ]
               }
@@ -441,7 +441,7 @@
               "Fn::Join": [
                 "",
                 [
-                  "366590864501.dkr.ecr.",
+                  "269550163595.dkr.ecr.",
                   {
                     "Ref": "AWS::Region"
                   },

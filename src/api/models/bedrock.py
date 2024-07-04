@@ -119,13 +119,13 @@ class BedrockModel(BaseChatModel, ABC):
 
         message_id = self.generate_message_id()
         for stream_response in self.parse_stream_response(
-                chat_request, response, message_id
+            chat_request, response, message_id
         ):
             if stream_response.choices:
                 yield self.stream_response_to_bytes(stream_response)
             elif (
-                    chat_request.stream_options
-                    and chat_request.stream_options.include_usage
+                chat_request.stream_options
+                and chat_request.stream_options.include_usage
             ):
                 # An empty choices for Usage as per OpenAI doc below:
                 # if you set stream_options: {"include_usage": true}.
@@ -158,7 +158,7 @@ class BedrockModel(BaseChatModel, ABC):
         return input_tokens, output_tokens
 
     def parse_response(
-            self, chat_request: ChatRequest, service_response: dict, message_id: str
+        self, chat_request: ChatRequest, service_response: dict, message_id: str
     ) -> ChatResponse:
         response_body = json.loads(service_response.get("body").read())
         if DEBUG:
@@ -175,7 +175,7 @@ class BedrockModel(BaseChatModel, ABC):
         )
 
     def parse_stream_response(
-            self, chat_request: ChatRequest, service_response: dict, message_id: str
+        self, chat_request: ChatRequest, service_response: dict, message_id: str
     ) -> Iterable[ChatStreamResponse]:
 
         chunk_id = 0
@@ -264,13 +264,13 @@ class BedrockModel(BaseChatModel, ABC):
 
     @staticmethod
     def create_response(
-            model: str,
-            message_id: str,
-            message: str | None = None,
-            finish_reason: str | None = None,
-            tools: list[ToolCall] | None = None,
-            input_tokens: int = 0,
-            output_tokens: int = 0,
+        model: str,
+        message_id: str,
+        message: str | None = None,
+        finish_reason: str | None = None,
+        tools: list[ToolCall] | None = None,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
     ) -> ChatResponse:
         response = ChatResponse(
             id=message_id,
@@ -298,13 +298,13 @@ class BedrockModel(BaseChatModel, ABC):
 
     @staticmethod
     def create_response_stream(
-            model: str,
-            message_id: str,
-            chunk_message: str | None = None,
-            finish_reason: str | None = None,
-            tools: list[ToolCall] | None = None,
-            input_tokens: int = 0,
-            output_tokens: int = 0,
+        model: str,
+        message_id: str,
+        chunk_message: str | None = None,
+        finish_reason: str | None = None,
+        tools: list[ToolCall] | None = None,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
     ) -> ChatStreamResponse:
         if chunk_message or finish_reason or tools:
             response = ChatStreamResponse(
@@ -413,7 +413,7 @@ Please think if you need to use a tool or not for user's question, you must:
         return json.dumps(args)
 
     def parse_response(
-            self, chat_request: ChatRequest, service_response: dict, message_id: str
+        self, chat_request: ChatRequest, service_response: dict, message_id: str
     ) -> ChatResponse:
         response_body = json.loads(service_response.get("body").read())
         if DEBUG:
@@ -439,7 +439,7 @@ Please think if you need to use a tool or not for user's question, you must:
         )
 
     def parse_stream_response(
-            self, chat_request: ChatRequest, service_response: dict, message_id: str
+        self, chat_request: ChatRequest, service_response: dict, message_id: str
     ) -> Iterable[ChatStreamResponse]:
 
         chunk_id = 0
@@ -517,7 +517,9 @@ Please think if you need to use a tool or not for user's question, you must:
         if DEBUG:
             logger.info("Tool message: " + tool_message.replace("\n", " "))
         try:
-            tool_messages = tool_message[tool_message.rindex("<function>") + len("<function>"):]
+            tool_messages = tool_message[
+                tool_message.rindex("<function>") + len("<function>") :
+            ]
             function = json.loads(tool_messages.replace("\n", " "))
             args = json.dumps(function.get("arguments", {}))
             function = ResponseFunction(name=function["name"], arguments=args)
@@ -565,7 +567,7 @@ Please think if you need to use a tool or not for user's question, you must:
             )
 
     def _parse_content_parts(
-            self, content: list[TextContent | ImageContent]
+        self, content: list[TextContent | ImageContent]
     ) -> list[dict]:
         # See: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
         content_parts = []
@@ -803,12 +805,12 @@ class BedrockEmbeddingsModel(BaseEmbeddingsModel, ABC):
             raise HTTPException(status_code=500, detail=str(e))
 
     def _create_response(
-            self,
-            embeddings: list[float],
-            model: str,
-            input_tokens: int = 0,
-            output_tokens: int = 0,
-            encoding_format: Literal["float", "base64"] = "float",
+        self,
+        embeddings: list[float],
+        model: str,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        encoding_format: Literal["float", "base64"] = "float",
     ) -> EmbeddingsResponse:
         data = []
         for i, embedding in enumerate(embeddings):
@@ -884,8 +886,8 @@ class TitanEmbeddingsModel(BedrockEmbeddingsModel):
         if isinstance(embeddings_request.input, str):
             input_text = embeddings_request.input
         elif (
-                isinstance(embeddings_request.input, list)
-                and len(embeddings_request.input) == 1
+            isinstance(embeddings_request.input, list)
+            and len(embeddings_request.input) == 1
         ):
             input_text = embeddings_request.input[0]
         else:
@@ -922,20 +924,19 @@ class TitanEmbeddingsModel(BedrockEmbeddingsModel):
 def get_model(model_id: str) -> BedrockModel:
     if DEBUG:
         logger.info("model id is " + model_id)
-    if model_id not in SUPPORTED_BEDROCK_MODELS.keys():
-        logger.error("Unsupported model id " + model_id)
-        raise HTTPException(
-            status_code=400,
-            detail="Unsupported model id " + model_id,
-        )
+    if "imported-model" in model_id:
+        return LlamaModel()
     if model_id.startswith("anthropic.claude"):
         return ClaudeModel()
     elif model_id.startswith("meta.llama"):
         return LlamaModel()
-    elif model_id.startswith("mistral.mistral") or model_id.startswith("mistral.mixtral"):
+    elif model_id.startswith("mistral.mistral") or model_id.startswith(
+        "mistral.mixtral"
+    ):
         return MistralModel()
     elif model_id.startswith("cohere.command-r"):
         return CohereCommandModel()
+    return LlamaModel()
 
 
 def get_embeddings_model(model_id: str) -> BedrockEmbeddingsModel:

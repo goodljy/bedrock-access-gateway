@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 async def validate_model_id(model_id: str):
-    if model_id not in (SUPPORTED_BEDROCK_MODELS | SUPPORTED_BEDROCK_EMBEDDING_MODELS).keys():
+    if model_id not in (SUPPORTED_BEDROCK_MODELS | SUPPORTED_BEDROCK_EMBEDDING_MODELS).keys() and "imported-model" not in model_id:
         raise HTTPException(status_code=500, detail="Unsupported Model Id")
 
 
