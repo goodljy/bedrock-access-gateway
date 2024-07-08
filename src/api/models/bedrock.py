@@ -615,15 +615,6 @@ class CustomImportModel(BedrockModel):
         }
         return json.dumps(args)
 
-    def parse_response(self, response: Dict[str, Any]) -> str:
-        """Parse the response from the custom imported model."""
-        if self.text_field_name in response:
-            return response[self.text_field_name]
-        else:
-            raise ValueError(
-                f"Expected field '{self.text_field_name}' not found in response"
-            )
-
     def get_finish_reason(self, response: Dict[str, Any]) -> str:
         """Get the finish reason from the response."""
         if self.finish_reason_field_name in response:
@@ -631,14 +622,15 @@ class CustomImportModel(BedrockModel):
         else:
             return "unknown"
 
-    def get_message_text(self, response_body: dict) -> str | None:
-        return super().get_message_text(response_body["outputs"][0])
+    def get_message_text(self, response_body: dict) -> str:
+        return response_body["outputs"][0]["text"]
 
-    def get_message_finish_reason(self, response_body: dict) -> str | None:
-        return super().get_message_finish_reason(response_body["outputs"][0])
+    def get_message_finish_reason(self, response_body: dict) -> str:
+        return response_body["outputs"][0]["stop_reason"]
 
     def get_message_usage(self, response_body: dict) -> tuple[int, int]:
-        # Mistral/Mixtral does not provide info about usage
+        # 현재 응답에 usage 정보가 없으므로, 임시로 0, 0을 반환합니다.
+        # 실제 usage 정보가 제공된다면 이 부분을 수정해야 합니다.
         return 0, 0
 
 
