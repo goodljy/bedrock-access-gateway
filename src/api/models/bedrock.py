@@ -3,13 +3,14 @@ import json
 import logging
 import re
 from abc import ABC, abstractmethod
-from typing import AsyncIterable, Iterable, Literal
+from typing import AsyncIterable, Iterable, Literal, Dict, Any
 
 import boto3
 import numpy as np
 import requests
 import tiktoken
 from fastapi import HTTPException
+
 
 from api.models.base import BaseChatModel, BaseEmbeddingsModel
 from api.schema import (
@@ -589,6 +590,58 @@ Please think if you need to use a tool or not for user's question, you must:
         return content_parts
 
 
+class CustomImportModel(BedrockModel):
+    text_field_name = "generation"
+    finish_reason_field_name = "stop_reason"
+
+    @staticmethod
+    def create_prompt(chat_request: ChatRequest) -> str:
+        """Create a prompt message for the custom imported model."""
+        prompt_lines = []
+        for msg in chat_request.messages:
+            prompt_lines.append(f"<|{msg.role}|>{msg.content}</s>")
+        prompt_lines.append("<|assistant|>")
+        return "".join(prompt_lines)
+
+    def compose_request_body(self, chat_request: ChatRequest) -> str:
+        prompt = self.create_prompt(chat_request)
+        args = {
+            "prompt": prompt,
+            "max_tokens": chat_request.max_tokens or 512,  # Default value
+            "temperature": chat_request.temperature or 0.5,  # Default value
+            "top_p": chat_request.top_p or 0.9,  # Default value
+            "top_k": 200,  # Default value
+            "stop": [],  # Default value
+        }
+        return json.dumps(args)
+
+    def parse_response(self, response: Dict[str, Any]) -> str:
+        """Parse the response from the custom imported model."""
+        if self.text_field_name in response:
+            return response[self.text_field_name]
+        else:
+            raise ValueError(
+                f"Expected field '{self.text_field_name}' not found in response"
+            )
+
+    def get_finish_reason(self, response: Dict[str, Any]) -> str:
+        """Get the finish reason from the response."""
+        if self.finish_reason_field_name in response:
+            return response[self.finish_reason_field_name]
+        else:
+            return "unknown"
+
+    def get_message_text(self, response_body: dict) -> str | None:
+        return super().get_message_text(response_body["outputs"][0])
+
+    def get_message_finish_reason(self, response_body: dict) -> str | None:
+        return super().get_message_finish_reason(response_body["outputs"][0])
+
+    def get_message_usage(self, response_body: dict) -> tuple[int, int]:
+        # Mistral/Mixtral does not provide info about usage
+        return 0, 0
+
+
 class LlamaModel(BedrockModel):
     text_field_name = "generation"
     finish_reason_field_name = "stop_reason"
@@ -925,7 +978,7 @@ def get_model(model_id: str) -> BedrockModel:
     if DEBUG:
         logger.info("model id is " + model_id)
     if "imported-model" in model_id:
-        return LlamaModel()
+        return CustomImportModel()
     if model_id.startswith("anthropic.claude"):
         return ClaudeModel()
     elif model_id.startswith("meta.llama"):
@@ -936,7 +989,7 @@ def get_model(model_id: str) -> BedrockModel:
         return MistralModel()
     elif model_id.startswith("cohere.command-r"):
         return CohereCommandModel()
-    return LlamaModel()
+    return CustomImportModel()
 
 
 def get_embeddings_model(model_id: str) -> BedrockEmbeddingsModel:
