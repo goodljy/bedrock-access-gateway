@@ -619,12 +619,17 @@ class CustomImportModel(BedrockModel):
         # prompt_lines.append("<|assistant|>")
         
         #Log - if True:
+        logger.error("Converted prompt for CustomImportModel: " + prompt.replace("\n", "\\n"))
         logger.info("Converted prompt for CustomImportModel: " + prompt.replace("\n", "\\n"))
 
         return prompt
 
     def compose_request_body(self, chat_request: ChatRequest) -> str:
         prompt = self.create_prompt(chat_request)
+        #Log - if True:
+        logger.error("Converted prompt for CustomImportModel: " + prompt.replace("\n", "\\n"))
+        logger.info("Converted prompt for CustomImportModel: " + prompt.replace("\n", "\\n"))
+
         args = {
             "prompt": prompt,
             "max_tokens": chat_request.max_tokens or 512,  # Default value
