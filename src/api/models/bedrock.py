@@ -610,8 +610,8 @@ class CustomImportModel(BedrockModel):
                 prompt_lines.append("\n\n")
             prompt_lines.append("<|eot_id|>")
 
-        prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
-        prompt_lines.append("\n\n")
+        # prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
+        # prompt_lines.append("\n\n")
         
         # for msg in chat_request.messages:
         #     prompt_lines.append(f"<|{msg.role}|>{msg.content}</s>")
