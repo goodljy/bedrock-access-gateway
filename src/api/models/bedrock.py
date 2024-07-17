@@ -610,13 +610,18 @@ class CustomImportModel(BedrockModel):
                 prompt_lines.append("\n\n")
             prompt_lines.append("<|eot_id|>")
 
-        # prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
-        # prompt_lines.append("\n\n")
+        prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
+        prompt_lines.append("\n\n")
+        prompt = "".join(prompt_lines)
         
         # for msg in chat_request.messages:
         #     prompt_lines.append(f"<|{msg.role}|>{msg.content}</s>")
         # prompt_lines.append("<|assistant|>")
-        return "".join(prompt_lines)
+        
+        #Log - if True:
+        logger.info("Converted prompt for CustomImportModel: " + prompt.replace("\n", "\\n"))
+
+        return prompt
 
     def compose_request_body(self, chat_request: ChatRequest) -> str:
         prompt = self.create_prompt(chat_request)
