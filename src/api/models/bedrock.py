@@ -598,9 +598,23 @@ class CustomImportModel(BedrockModel):
     def create_prompt(chat_request: ChatRequest) -> str:
         """Create a prompt message for the custom imported model."""
         prompt_lines = []
+        prompt_lines.append("<|begin_of_text|>")
+
         for msg in chat_request.messages:
-            prompt_lines.append(f"<|{msg.role}|>{msg.content}</s>")
-        prompt_lines.append("<|assistant|>")
+            prompt_lines.append("<|start_header_id|>")
+            prompt_lines.append(msg.role)
+            prompt_lines.append("<|end_header_id|>")
+            prompt_lines.append("\n\n")
+            prompt_lines.append(msg.content)
+            prompt_lines.append("\n\n")
+            prompt_lines.append("<|eot_id|>")
+
+        prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
+        prompt_lines.append("\n\n")
+        
+        # for msg in chat_request.messages:
+        #     prompt_lines.append(f"<|{msg.role}|>{msg.content}</s>")
+        # prompt_lines.append("<|assistant|>")
         return "".join(prompt_lines)
 
     def compose_request_body(self, chat_request: ChatRequest) -> str:
@@ -628,10 +642,10 @@ class CustomImportModel(BedrockModel):
     def get_message_finish_reason(self, response_body: dict) -> str:
         return response_body["outputs"][0]["stop_reason"]
 
-    def get_message_usage(self, response_body: dict) -> tuple[int, int]:
-        # 현재 응답에 usage 정보가 없으므로, 임시로 0, 0을 반환합니다.
-        # 실제 usage 정보가 제공된다면 이 부분을 수정해야 합니다.
-        return 0, 0
+    # def get_message_usage(self, response_body: dict) -> tuple[int, int]:
+    #     # 현재 응답에 usage 정보가 없으므로, 임시로 0, 0을 반환합니다.
+    #     # 실제 usage 정보가 제공된다면 이 부분을 수정해야 합니다.
+    #     return 0, 0
 
 
 class LlamaModel(BedrockModel):
