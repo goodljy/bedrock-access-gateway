@@ -602,10 +602,10 @@ class CustomImportModel(BedrockModel):
 
         for msg in chat_request.messages:
             prompt_lines.append("<|start_header_id|>")
-            prompt_lines.append({msg.role})
+            prompt_lines.append(f"{msg.role}")
             prompt_lines.append("<|end_header_id|>")
             prompt_lines.append("\n\n")
-            prompt_lines.append({msg.content})
+            prompt_lines.append(f"{msg.content}")
             if {msg.role} == "system":
                 prompt_lines.append("\n\n")
             prompt_lines.append("<|eot_id|>")
@@ -627,11 +627,9 @@ class CustomImportModel(BedrockModel):
         prompt = self.create_prompt(chat_request)
         args = {
             "prompt": prompt,
-            "max_tokens": chat_request.max_tokens or 512,  # Default value
-            "temperature": chat_request.temperature or 0.5,  # Default value
-            "top_p": chat_request.top_p or 0.9,  # Default value
-            "top_k": 200,  # Default value
-            "stop": [],  # Default value
+            "max_tokens": chat_request.max_tokens or 500,  # Default value
+            "temperature": chat_request.temperature or 0.6,  # Default value
+            "top_p": chat_request.top_p or 0.3,  # Default value
         }
         return json.dumps(args)
 
