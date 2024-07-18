@@ -602,11 +602,11 @@ class CustomImportModel(BedrockModel):
 
         for msg in chat_request.messages:
             prompt_lines.append("<|start_header_id|>")
-            prompt_lines.append(msg.role)
+            prompt_lines.append({msg.role})
             prompt_lines.append("<|end_header_id|>")
             prompt_lines.append("\n\n")
-            prompt_lines.append(msg.content)
-            if msg.role == "system":
+            prompt_lines.append({msg.content})
+            if {msg.role} == "system":
                 prompt_lines.append("\n\n")
             prompt_lines.append("<|eot_id|>")
 
