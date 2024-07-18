@@ -103,7 +103,7 @@ class BedrockModel(BaseChatModel, ABC):
         response = self.invoke_model(
             request_body=request_body,
             model_id=chat_request.model,
-            
+
         )
         message_id = self.generate_message_id()
         return self.parse_response(chat_request, response, message_id)
@@ -599,20 +599,20 @@ class CustomImportModel(BedrockModel):
     def create_prompt(chat_request: ChatRequest) -> str:
         """Create a prompt message for the custom imported model."""
         prompt_lines = []
-        prompt_lines.append("<|begin_of_text|>")
+        # prompt_lines.append("<|begin_of_text|>")
 
-        for msg in chat_request.messages:
-            prompt_lines.append("<|start_header_id|>")
-            prompt_lines.append(f"{msg.role}")
-            prompt_lines.append("<|end_header_id|>")
-            prompt_lines.append("\n\n")
-            prompt_lines.append(f"{msg.content}")
-            if {msg.role} == "system":
-                prompt_lines.append("\n\n")
-            prompt_lines.append("<|eot_id|>")
+        # for msg in chat_request.messages:
+        #     prompt_lines.append("<|start_header_id|>")
+        #     prompt_lines.append(f"{msg.role}")
+        #     prompt_lines.append("<|end_header_id|>")
+        #     prompt_lines.append("\n\n")
+        #     prompt_lines.append(f"{msg.content}")
+        #     if {msg.role} == "system":
+        #         prompt_lines.append("\n\n")
+        #     prompt_lines.append("<|eot_id|>")
 
-        prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
-        prompt_lines.append("\n\n")
+        # prompt_lines.append("<|start_header_id|>assistant<|end_header_id|>")
+        # prompt_lines.append("\n\n")
         prompt = "".join(prompt_lines)
         
         # for msg in chat_request.messages:
@@ -625,7 +625,9 @@ class CustomImportModel(BedrockModel):
         return prompt
 
     def compose_request_body(self, chat_request: ChatRequest) -> str:
-        prompt = self.create_prompt(chat_request)
+        # prompt = self.create_prompt(chat_request)
+        user_input="한국에서 제일 안좋은 범죄도시는 인천이라고 생각해"
+        prompt  = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are an \"AI Agent Classifier\" that classifies various types of \"AI Agents\" according to the user's utterances.\n\nYou're actively involved in a two-way conversation with \"user\" and yourself (\"assistant\"). \nYou must classify the appropriate \"agent\" and \"intent\" among the predefined lists of \"agent\" and \"intent\" according to the user's utterance, and keep the following rules.\n\n1. \"agent\" and \"intent\" must be classified only from the lists provided below. You should never guess and create something that is not in the defined list.\n2. Each \"agent\" has a sub-\"intent\", and if the user’s utterance is classified for a specific \"agent\", only one \"intent\" must be classified from those defined within the \"agent\".\n3. If it is determined that there is no \"agent\" suitable for the user's utterance, it must be classified as \"none\".\n4. If \"agent\" is classified to be \"none\", \"intent\" must also be classified to be \"none\".\n5. Two or more \"agents\" may be selected depending on the user’s utterance, and in that case, one \"intent\" for each \"agent\" must also be selected.\n\nThe \"agents\" and \"intents\" are listed below:\n\n{'agents': [{'name': 'none', 'intents': ['none']}, {'name': 'apollo.builtin.main', 'intents': ['get_event_from_calendar', 'add_event_to_calendar', 'update_event_on_calendar', 'get_fortune_info', 'search_route', 'search_tmap_info', 'get_weather', 'control_news', 'search_restaurant', 'get_liked_restaurants_list', 'get_time', 'get_date_info', 'get_d_day_info', 'convert_date', 'control_radio', 'get_radio_channel_list', 'get_radio_channel_schedule', 'update_user_preference_radio', 'search_congestion']}, {'name': 'apollo.builtin.plugin.music', 'intents': ['apolloMusic_play', 'apolloMusic_play_entity', 'apolloMusic_play_entity2', 'apolloMusic_play_remove', 'apolloMusic_play_addRemove', 'apolloMusic_list_add', 'apolloMusic_list_remove', 'apolloMusic_list_addRemove', 'apolloMusic_extra']}, {'name': 'apollo.builtin.agent.media', 'intents': ['apolloMedia_play', 'apolloMedia_play_entity', 'apolloMedia_play_entity_2', 'apolloMedia_play_remove', 'apolloMedia_search', 'apolloMedia_channel', 'apolloMedia_clip', 'apolloMedia_youtube', 'apolloMedia_sports', 'apolloMedia_extra']}, {'name': 'apollo.builtin.plugin.movie', 'intents': ['apolloMovie_reserve', 'apolloMovie_reserve_entity', 'apolloMovie_reserve_entity_2', 'apolloMovie_screening', 'apolloMovie_theater', 'apolloMovie_tMembership', 'apolloMovie_get', 'apolloMovie_remove']}, {'name': 'apollo.builtin.agent.stock', 'intents': ['apolloStock_favorite', 'apolloStock_disclosure', 'apolloStock_disclosure_stock', 'apolloStock_disclosure_favorite', 'apolloStock_stock_detail', 'apolloStock_calendar_economic', 'apolloStock_calendar_market', 'apolloStock_price', 'apolloStock_price_index', 'apolloStock_price_market', 'apolloStock_price_stockPrice', 'apolloStock_price_stock', 'apolloStock_cap_stock', 'apolloStock_volume_stock', 'apolloStock_volume', 'apolloStock_volume_kos', 'apolloStock_buy', 'apolloStock_buy_kos', 'apolloStock_sell', 'apolloStock_sell_kos', 'apolloStock_upperLimit', 'apolloStock_upperLimit_kos', 'apolloStock_lowerLimit', 'apolloStock_lowerLimit_kos', 'apolloStock_52wHigh', 'apolloStock_52wLow', 'apolloStock_price_high', 'apolloStock_price_high_kos', 'apolloStock_price_low', 'apolloStock_price_low_kos', 'apolloStock_report', 'apolloStock_report_stock', 'apolloStock_report_favorite', 'apolloStock_recommendation', 'apolloStock_recommendation_theme', 'apolloStock_theme', 'apolloStock_news', 'apolloStock_ask']}, {'name': 'apollo.builtin.mno', 'intents': ['apolloTMNO_play', 'apolloTMNO_help', 'apolloTMNO_remaining_data', 'apolloTMNO_remaining_call', 'apolloTMNO_payment', 'apolloTMNO_payment_realtime', 'apolloTMNO_payment_overdue', 'apolloTMNO_payment_monthly', 'apolloTMNO_payment_ask', 'apolloTMNO_payment_account', 'apolloTMNO_payment_mobilePayments', 'apolloTMNO_changeLimit_mobilePayments', 'apolloTMNO_refill', 'apolloTMNO_refill_gift', 'apolloTMNO_refill_remaining', 'apolloTMNO_plan_ask', 'apolloTMNO_plan_recommand', 'apolloTMNO_agreement', 'apolloTMNO_installment', 'apolloTMNO_additional', 'apolloTMNO_additional_join', 'apolloTMNO_coloring', 'apolloTMNO_coloring_join', 'apolloTMNO_coloring_cancel', 'apolloTMNO_universe', 'apolloTMNO_universe_use', 'apolloTMNO_universe_join', 'apolloTMNO_universe_cancel', 'apolloTMNO_roaming', 'apolloTMNO_roaming_use', 'apolloTMNO_roaming_join', 'apolloTMNO_roaming_recommand', 'apolloTMNO_roaming_plan', 'apolloTMNO_barcode', 'apolloTMNO_membership', 'apolloTMNO_membership_benefit', 'apolloTMNO_membership_schedule', 'apolloTMNO_coupon', 'apolloTMNO_partner', 'apolloTMNO_partner_brand', 'apolloTMNO_movie', 'apolloTMNO_movie_history', 'apolloTMNO_movie_cancel', 'apolloTMNO_shopping', 'apolloTMNO_membership_history']}]}\n\n<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n" + user_input + "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
 
         body = json.dumps({
             "prompt": prompt,
