@@ -103,6 +103,7 @@ class BedrockModel(BaseChatModel, ABC):
         response = self.invoke_model(
             request_body=request_body,
             model_id=chat_request.model,
+            
         )
         message_id = self.generate_message_id()
         return self.parse_response(chat_request, response, message_id)
@@ -625,13 +626,21 @@ class CustomImportModel(BedrockModel):
 
     def compose_request_body(self, chat_request: ChatRequest) -> str:
         prompt = self.create_prompt(chat_request)
-        args = {
+
+        body = json.dumps({
             "prompt": prompt,
-            "max_tokens": chat_request.max_tokens or 500,  # Default value
-            "temperature": chat_request.temperature or 0.6,  # Default value
-            "top_p": chat_request.top_p or 0.3,  # Default value
-        }
-        return json.dumps(args)
+            "temperature": chat_request.temperature or 0.6,
+            "top_p": chat_request.top_p or 0.3,
+            "max_tokens": chat_request.max_tokens or 500,
+        })
+        # args = {
+        #     "prompt": prompt,
+        #     "max_tokens": chat_request.max_tokens or 500,  # Default value
+        #     "temperature": chat_request.temperature or 0.6,  # Default value
+        #     "top_p": chat_request.top_p or 0.3,  # Default value
+        # }
+        # return json.dumps(args)
+        return body
 
     def get_finish_reason(self, response: Dict[str, Any]) -> str:
         """Get the finish reason from the response."""
